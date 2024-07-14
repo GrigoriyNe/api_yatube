@@ -4,12 +4,13 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from posts.models import Comment, Group, Post, User
-from .api_permissions import ApiAuthorPermission
-from .serializers import (CommentSerializer,
-                          GroupSerializer,
-                          PostSerializer,
-                          UserSerializer
-                          )
+from .api_permissions import IsAuthorOrReadOnly
+from .serializers import (
+    CommentSerializer,
+    GroupSerializer,
+    PostSerializer,
+    UserSerializer
+)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -17,7 +18,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = (
         IsAuthenticated,
-        ApiAuthorPermission
+        IsAuthorOrReadOnly
     )
 
     def perform_create(self, serializer):
@@ -37,12 +38,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticated, ApiAuthorPermission)
+    permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
+
+    def get_post(self):
+        return get_object_or_404(Post, pk=self.kwargs['post_id'])
 
     def get_queryset(self):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        return post.comments
+        return self.get_post().comments
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        serializer.save(author=self.request.user, post=post)
+        self.get_post()
+        serializer.save(author=self.request.user, post=self.get_post())
