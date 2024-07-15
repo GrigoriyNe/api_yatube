@@ -5,10 +5,6 @@ from posts.models import Comment, Group, Post, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    post = serializers.StringRelatedField(
-        many=True,
-        read_only=True
-    )
 
     class Meta:
         model = User
