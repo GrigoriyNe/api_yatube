@@ -14,7 +14,7 @@ from .serializers import (
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().select_related(
+    queryset = Post.objects.select_related(
         'author'
     )
     serializer_class = PostSerializer
@@ -38,7 +38,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().select_related(
+    queryset = Comment.objects.select_related(
         'author'
     )
     serializer_class = CommentSerializer
